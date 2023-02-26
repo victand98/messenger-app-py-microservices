@@ -31,7 +31,7 @@ class RedisCLient:
 
     def set_message(self, message):
         message_id = uuid4().hex
-        self.redis.set(message_id, message)
+        self.redis.set(message_id, message, ex=10)
         return message_id
 
     def get_all_messages(self):
@@ -42,7 +42,8 @@ class RedisCLient:
             message = self.redis.get(message_id)
             messages.append({
                 'id': message_id,
-                'message': message
+                'message': message,
+                "expires_in": self.redis.ttl(message_id)
             })
 
         return messages

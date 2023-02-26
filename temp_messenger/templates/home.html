@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+</head>
+
+<body>
+    <h1>Temp Messenger</h1>
+
+    <div class="messages"></div>
+
+    <form action="/messages" id="postMessage" method="post">
+        <input type="text" name="message" id="message" placeholder="Enter your message">
+        <input type="submit" value="Send">
+    </form>
+
+<script>
+    function poll() {
+        $.ajax({
+            type: "GET",
+            url: "/messages",
+            dataType: "json",
+            success: function(data) {
+                updateMessages(data);
+            }
+            timeout: 500,
+            complete: setTimeout(poll, 1000)
+        });
+    }
+
+    poll();
+
+    function updateMessages(messages){
+        var content = "<div>";
+        if(messages.length === 0) {
+            content += "<p>No messages</p>";
+        } else {
+            $.each(messages, function(index, value) {
+                content += "<p>" + value.message + "</p>";
+            });
+        }
+
+        content += "</div>";
+        $(".messages").replaceWith(content);
+    }
+
+    $("#postMessage").submit(function(e) {
+        e.preventDefault();
+        var message = $("#message").val();
+        var url = $(this).attr("action");
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: JSON.stringify({message: message}),
+            contentType: "application/json",
+            dataType: "json",
+            success: function(data) {
+                console.log(data);
+                location.reload();
+            }
+        });
+    });
+</script>
+</body>
+
